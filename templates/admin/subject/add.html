@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+{% block title %}
+    New Subject
+{% endblock %}
+
+{% block content %}
+    <h1 class="display-1">New Subject</h1>
+<form action="{{url_for('add_subject_post')}}" method="post" class="form">
+    <div class="form-group">
+        <label for="name" class="form-label">Subject Name:</label>
+        <input type="text" 
+        name="subject_name" 
+        id="subject_name" 
+        class="form-control" 
+        required>
+    </div>
+    <div class="form-group">
+        <label for="name" class="form-label">Description:</label>
+        <input type="text" 
+        name="description" 
+        id="description" 
+        class="form-control" 
+        required>
+    </div>
+    <button type="submit" class="btn btn-success">
+        <i class="fas fa-plus"></i>
+        Add
+    </button>
+</form>
+
+{% endblock %}
+
+{% block style %}
+    <style>
+        .display-1{
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+{% endblock %}

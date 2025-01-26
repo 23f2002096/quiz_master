@@ -1,0 +1,131 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Quiz Management
+{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Quiz Management</h1>
+
+{% if search_query and not quizzes %}
+    <p class="no-results-message">No quiz found for "{{ search_query }}".</p>
+{% endif %}
+
+<div class="quizzes">
+    
+    {% for quiz in quizzes %}
+    <div class="quiz-panel">
+        
+            <h3>Quiz  ({{ quiz.chapter.name }})
+                <a href="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </h3>
+        <table class="question-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Question Title</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in questions if question.quiz_id == quiz.id %}
+                <tr>
+                    <td>{{ question.id }}</td>
+                    <td>{{ question.title }}</td>
+                    <td>
+                        <a href="#" class="btn btn-primary">Edit</a>
+                        <a href="#" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('add_question', quiz_id=quiz.id) }}" class="add-question-btn">+ Question</a>
+    </div>
+    {% endfor %}
+</div>
+
+
+
+{% if not show_all %}
+<a href="{{ url_for('quiz', show_all='true') }}" class="all-quiz-link">All quizzes here...</a>
+
+{% endif %}
+<button class="add-question-btn"><a href="{{ url_for('add_quiz', show_all='true') }}" class="add-quiz-btn">+ Quiz</a></button>
+{% endblock %}
+
+
+{% block style %}
+<style>
+    .no-results-message {
+        text-align: center;
+        color: red;
+        font-weight: bold;
+        margin: 20px 0;
+    }
+    .dashboard-title {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .quizzes {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Two columns per row */
+        gap: 20px;
+        justify-content: center;
+        margin: 20px;
+    }
+
+    .quiz-panel {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .quiz-panel h3 {
+        margin-bottom: 10px;
+        text-align: center;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .question-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+    }
+
+    .question-table th,
+    .question-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+
+    .add-question-btn {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .add-quiz-btn {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+    }
+    a{
+        text-decoration: none;
+    }
+</style>
+{% endblock %}

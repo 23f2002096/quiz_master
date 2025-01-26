@@ -1,0 +1,101 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Summary Charts
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-panel">
+    <h3 class="panel-title">Summary Charts</h3>
+    <div class="chart-container">
+        <div class="chart">
+            <h4>Subject-wise No. of Quizzes</h4>
+            <canvas id="subjectChart"></canvas>
+        </div>
+        <div class="chart">
+            <h4>Month-wise No. of Quizzes Attempted</h4>
+            <canvas id="monthChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Subject-wise data
+    const subjectData = {{ subject_data | tojson }}
+    const subjectLabels = Object.keys(subjectData)
+    const subjectValues = Object.values(subjectData)
+
+    // Month-wise data
+    const monthData = {{ month_data | tojson }}
+    const monthLabels = Object.keys(monthData).map(month => `Month ${month}`)
+    const monthValues = Object.values(monthData)
+
+    // Subject Chart
+    const ctx1 = document.getElementById('subjectChart').getContext('2d')
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: subjectLabels,
+            datasets: [{
+                label: 'No. of Quizzes',
+                data: subjectValues,
+                backgroundColor: ['#4CAF50', '#2196F3', '#FFC107'],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // Month Chart
+    const ctx2 = document.getElementById('monthChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                data: monthValues,
+                backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#F3FF33']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+{% block style %}
+<style>
+    .chart-container {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .chart {
+        flex: 1;
+        min-width: 300px;
+        max-width: 45%;
+        text-align: center;
+    }
+    
+    .chart h4 {
+        margin-bottom: 10px;
+        color: #333;
+        font-size: 18px;
+    }
+    
+</style>
+{% endblock %}

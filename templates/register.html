@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Register Page
+{% endblock %}
+
+{% block content%}
+    <h1 class="display-1">Welcome to Quiz Master</h1>
+    <h3 class="display-1">Registration</h3>
+    <form action="" class="form" method="post">
+        <div class="form-group">
+            <label for="username" class="form-label">Username(E-mail):</label>
+            <input type="text" name="username" required class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="password" class="form-label">Password:</label>
+            <input type="password" name="password" required class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="confirm_password" class="form-label">Confirm Password:</label>
+            <input type="password" name="confirm_password" required class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="full_name" class="form-label">Full Name:</label>
+            <input type="text" name="full_name" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="qualification" class="form-label">Qualification:</label>
+            <input type="text" name="qualification" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="dob" class="form-label">Date of Birth:</label>
+            <input type="date" name="dob" id="dob" required
+            class="form-control">
+        </div>
+        <div class="form-group-btn">
+            <input type="submit" value="Register" class="btn btn-primary">
+            <a href="{{url_for('login')}}" >Existing user?</a>
+        </div>
+    </form>
+{% endblock %}
+
+{% block style %}
+    <style>
+        .form-group-btn{
+            display: flex;
+            justify-content: space-between;
+        }
+        .display-1{
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,60 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Quiz Master</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if 'user_id' in session %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Home</a>
+                    </li>
+                    {% if session['is_admin'] %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('quiz') }}">Quiz</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('quiz_scores', user_id=session['user_id']) }}">Score</a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('summary', user_id=session['user_id']) }}">Summary</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            
+            {% if session['is_admin'] %}
+                <!-- Include the search bar from 'searchbar.html' -->
+                {% include 'searchbar_admin.html' %}
+            
+
+            {% endif %}
+
+            {% if 'user_id' in session %}
+            <!-- Welcome Message -->
+            <span class="navbar-text ms-3">
+                {% if session['is_admin'] %}
+                   <strong>Welcome, Admin</strong>
+                {% else %}
+                   <strong>Welcome, {{ session['username'] }}</strong>
+                {% endif %}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+</nav>

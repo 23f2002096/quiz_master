@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Quiz Scores
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-panel">
+    <h3 class="panel-title">Quiz Scores</h3>
+    <table class="quiz-table">
+        <thead>
+            <tr>
+                <th>Quiz ID</th>
+                <th>No. of Questions</th>
+                <th>Attempted Date</th>
+                <th>Score</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in score_details %}
+            <tr>
+                <td>{{ detail.quiz_id }}</td>
+                <td>{{ detail.number_of_questions }}</td>
+                <td>{{ detail.attempted_date.strftime('%d/%m/%Y') }}</td>
+                <td>{{ detail.total_score }}</td>
+                
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">No quiz scores available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{{url_for('index')}}" class="btn btn-info">Close</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+    /* Styles copied from the provided code */
+    
+    .dashboard-panel { 
+        border: 1px solid #ddd; 
+        border-radius: 10px; 
+        padding: 20px; 
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
+        margin: 0 auto; 
+        width: 85%; 
+        background-color: #fdfdfd; 
+    }
+    .panel-title { 
+        text-align: center; 
+        font-size: 22px; 
+        font-weight: bold; 
+        margin-bottom: 15px; 
+        color: #007bff; 
+    }
+    .quiz-table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-bottom: 20px; 
+        font-family: Arial, sans-serif; 
+    }
+    .quiz-table th { 
+        background-color: #f4f4f4; 
+        color: #333; 
+        font-weight: bold; 
+        padding: 12px 10px; 
+        border: 1px solid #ddd; 
+    }
+    .quiz-table td { 
+        border: 1px solid #ddd; 
+        padding: 10px; 
+        text-align: center; 
+    }
+    .quiz-table tr:nth-child(even) { 
+        background-color: #f9f9f9; 
+    }
+   
+    
+    
+
+</style>
+{% endblock %}

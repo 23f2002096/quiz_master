@@ -1,0 +1,157 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Quiz Details
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-panel">
+    <h3 class="panel-title">Quiz Details</h3>
+    <table class="quiz-table">
+        <tbody>
+            <tr>
+                <th>Quiz ID</th>
+                <td>{{ quiz.id }}</td>
+            </tr>
+            
+            <tr>
+                <th>Subject Name</th>
+                <td>{{ subject.name }}</td>
+            </tr>
+            <tr>
+                <th>Chapter</th>
+                <td>{{ quiz.chapter.name }}</td>
+            </tr>
+            <tr>
+                <th>Number of Questions</th>
+                <th>{{number_of_questions}}</th>
+            </tr>
+            <tr>
+                <th>Date</th>
+                <td>{{ quiz.date_of_quiz.strftime('%d/%m/%Y') }}</td>
+            </tr>
+            <tr>
+                <th>Duration (hh:mm)</th>
+                <td>{{ quiz.time_duration }}</td>
+            </tr>
+            
+            {% if quiz.remarks %}
+            <tr>
+                <th>Remarks</th>
+                <td>{{ quiz.remarks }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{{url_for('index')}}" class="btn btn-info">Close</a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block style %}
+<style>
+    /* General Styles */
+    .dashboard-title {
+        text-align: center;
+        margin: 20px 0;
+        color: #343a40;
+        font-family: Arial, sans-serif;
+        font-size: 28px;
+    }
+
+    .dashboard-panel {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 0 auto;
+        width: 85%;
+        background-color: #fdfdfd;
+    }
+
+    .panel-title {
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #007bff;
+    }
+
+    /* Table Styling */
+    .quiz-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .quiz-table th {
+        background-color: #f4f4f4;
+        color: #333;
+        font-weight: bold;
+        padding: 12px 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .quiz-table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+
+    .quiz-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .quiz-table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Button Styles */
+    .btn {
+        text-decoration: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        transition: background-color 0.2s ease-in-out;
+        display: inline-block;
+    }
+
+    .btn-info {
+        background-color: #007bff;
+        color: white;
+        border: none;
+    }
+
+    .btn-info:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-panel {
+            width: 95%;
+        }
+
+        .quiz-table th,
+        .quiz-table td {
+            padding: 8px;
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}
