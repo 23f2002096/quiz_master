@@ -306,17 +306,28 @@ def delete_chapter(chapter_id):
         return redirect(url_for('admin'))
     return render_template('/admin/chapter/delete.html', chapter=chapter)
 
-@app.route('/chapter/<int:chapter_id>/delete',methods=['POST'])
+@app.route('/chapter/<int:chapter_id>/delete', methods=['POST'])
 @admin_required
 def delete_chapter_post(chapter_id):
-    chapter=Chapter.query.get(chapter_id)
+    chapter = Chapter.query.get(chapter_id)
+    
+    # If chapter not found, flash a danger message and redirect to admin page
     if not chapter:
-        flash('Chapter not found','danger')
+        flash('Chapter not found', 'danger')
         return redirect(url_for('admin'))
+    
+    # Delete the quiz
+    quizzes = Quiz.query.filter_by(chapter_id=chapter.id).all()
+    for quiz in quizzes:
+        db.session.delete(quiz)
+    
+    # update in database
     db.session.delete(chapter)
     db.session.commit()
-    flash('Chapter deleted successfully','success')
+    
+    flash('Chapter and related quizzes deleted successfully', 'success')
     return redirect(url_for('admin'))
+
 
 @app.route('/edit_chapter/<int:id>', methods=['GET', 'POST'])
 @admin_required
@@ -331,6 +342,27 @@ def edit_chapter(id):
         return redirect(url_for('admin'))
 
     return render_template('/admin/chapter/edit.html', chapter=chapter)
+
+@app.route('/question/<int:question_id>/delete')
+@admin_required
+def delete_question(question_id):
+    question=Question.query.get(question_id)
+    if not question:
+        flash('Question not found','danger')
+        return redirect(url_for('quiz'))
+    return render_template('/admin/question/delete.html', question=question)
+
+@app.route('/question/<int:question_id>/delete',methods=['POST'])
+@admin_required
+def delete_question_post(question_id):
+    question=Question.query.get(question_id)
+    if not question:
+        flash('Question not found','danger')
+        return redirect(url_for('quiz'))
+    db.session.delete(question)
+    db.session.commit()
+    flash('Question deleted successfully','success')
+    return redirect(url_for('quiz'))
 
 # ---------------------------------------quiz add/delete in quiz page-----------------------------------
 @app.route('/quiz/add')
@@ -392,7 +424,7 @@ def delete_quiz_post(quiz_id):
 @admin_required
 def add_question(quiz_id):
     chapters = Chapter.query.all()
-    return render_template('/admin/quiz/question.html', chapters=chapters, quiz_id=quiz_id)
+    return render_template('/admin/question/add.html', chapters=chapters, quiz_id=quiz_id)
 
 @app.route('/question/add/<int:quiz_id>', methods=['POST'])
 @admin_required
@@ -421,6 +453,19 @@ def add_question_post(quiz_id):
     db.session.commit()
     flash('Question added successfully!','success')
     return redirect(url_for('quiz'))
+
+@app.route('/question/edit/<int:question_id>',methods=['GET','POST'])
+@admin_required
+def edit_question(question_id):
+    question=Question.query.get_or_404(question_id)
+    chapters = Chapter.query.all()
+    if request.method=='POST':
+        question.title=request.form['title']
+        db.session.commit()
+        flash('Question title updated successfully!','success')
+        return redirect(url_for('quiz'))
+    
+    return render_template('/admin/question/edit.html', question=question)
 
 # ----------------------------------------------search button-----------------------------------------
 
