@@ -65,13 +65,21 @@ def register_post():
     
     user = User.query.filter_by(username=username).first()
 
+    dob_date = None
+    if dob:  # Ensure DOB is not empty
+        try:
+            dob = datetime.strptime(dob, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'danger')
+            return redirect(url_for('register'))
+
     if user:
         flash('Username already exists','success')
         return redirect(url_for('register'))
     
     password_hash = generate_password_hash(password)
     
-    new_user = User(username=username, passhash=password_hash, full_name=full_name)
+    new_user = User(username=username, passhash=password_hash, full_name=full_name,qualification=qualification,dob=dob)
     db.session.add(new_user)
     db.session.commit()
     return redirect(url_for('login'))
@@ -595,16 +603,49 @@ def start_quiz(quiz_id):
 
 
 
+# @app.route('/summary/<int:user_id>/')
+# def summary(user_id):
+#     # Subject-wise number of quizzes (including subjects with no attempts)
+#     subject_quizzes = db.session.query(
+#         Subject.name.label('subject_name'),
+#         func.count(Quiz.id).label('quiz_count')
+#     ).outerjoin(Chapter, Chapter.subject_id == Subject.id)\
+#      .outerjoin(Quiz, Quiz.chapter_id == Chapter.id)\
+#      .outerjoin(Score, Quiz.id == Score.quiz_id)\
+#      .filter((Score.user_id == user_id) | (Score.user_id.is_(None)))\
+#      .group_by(Subject.name)\
+#      .all()
+
+#     subject_quiz_data = {row.subject_name: row.quiz_count for row in subject_quizzes}
+
+#     # Month-wise number of quizzes attempted
+#     month_quizzes = db.session.query(
+#         func.strftime('%m', Score.time_stamp_of_attempt).label('month'),
+#         func.count(Score.id).label('quiz_count')
+#     ).filter(Score.user_id == user_id)\
+#      .group_by(func.strftime('%m', Score.time_stamp_of_attempt))\
+#      .all()
+
+#     month_quiz_data = {row.month: row.quiz_count for row in month_quizzes}
+
+#     return render_template(
+#         '/user/summary.html',
+#         subject_data=subject_quiz_data,
+#         month_data=month_quiz_data
+#     )
+
+
+
 @app.route('/summary/<int:user_id>/')
 def summary(user_id):
-    # Subject-wise number of quizzes (including subjects with no attempts)
+    # Subject-wise number of quizzes attempted by the user
     subject_quizzes = db.session.query(
         Subject.name.label('subject_name'),
-        func.count(Quiz.id).label('quiz_count')
-    ).outerjoin(Chapter, Chapter.subject_id == Subject.id)\
-     .outerjoin(Quiz, Quiz.chapter_id == Chapter.id)\
-     .outerjoin(Score, Quiz.id == Score.quiz_id)\
-     .filter((Score.user_id == user_id) | (Score.user_id.is_(None)))\
+        func.count(Score.quiz_id).label('quiz_count')
+    ).join(Chapter, Chapter.subject_id == Subject.id)\
+     .join(Quiz, Quiz.chapter_id == Chapter.id)\
+     .join(Score, Quiz.id == Score.quiz_id)\
+     .filter(Score.user_id == user_id)\
      .group_by(Subject.name)\
      .all()
 
@@ -620,8 +661,12 @@ def summary(user_id):
 
     month_quiz_data = {row.month: row.quiz_count for row in month_quizzes}
 
+    # Fetch user details for the summary page
+    user = User.query.get(user_id)
+
     return render_template(
         '/user/summary.html',
+        user=user,  # Pass user details
         subject_data=subject_quiz_data,
         month_data=month_quiz_data
     )

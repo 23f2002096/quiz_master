@@ -1,19 +1,23 @@
+
 {% extends 'layout.html' %}
 
 {% block title %}
-    Summary Charts
+    {{ user.full_name }}'s Summary
 {% endblock %}
 
 {% block content %}
 <div class="dashboard-panel">
-    <h3 class="panel-title">Summary Charts</h3>
+    <h3 class="panel-title">Summary for {{ user.full_name }}</h3>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Qualification:</strong> {{ user.qualification }}</p>
+    
     <div class="chart-container">
         <div class="chart">
-            <h4>Subject-wise No. of Quizzes</h4>
+            <h4>Subject-wise Attempted Quizzes</h4>
             <canvas id="subjectChart"></canvas>
         </div>
         <div class="chart">
-            <h4>Month-wise No. of Quizzes Attempted</h4>
+            <h4>Month-wise Attempted Quizzes</h4>
             <canvas id="monthChart"></canvas>
         </div>
     </div>
