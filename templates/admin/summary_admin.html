@@ -1,0 +1,101 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Admin Summary
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-panel">
+    <h3 class="panel-title">Admin Summary</h3>
+    
+    <div class="chart-container">
+        <div class="chart">
+            <h4>Subject-wise Top Scores</h4>
+            <canvas id="topScoresChart"></canvas>
+        </div>
+        <div class="chart">
+            <h4>Subject-wise User Attempts</h4>
+            <canvas id="userAttemptsChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Subject-wise top scores data
+    const topScoresData = {{ top_scores | tojson }};
+    const topScoresLabels = Object.keys(topScoresData);
+    const topScoresValues = Object.values(topScoresData);
+
+    // Subject-wise user attempts data
+    const userAttemptsData = {{ user_attempts | tojson }};
+    const userAttemptsLabels = Object.keys(userAttemptsData);
+    const userAttemptsValues = Object.values(userAttemptsData);
+
+    // Top Scores Bar Chart
+    const ctx1 = document.getElementById('topScoresChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: topScoresLabels,
+            datasets: [{
+                label: 'Top Score',
+                data: topScoresValues,
+                backgroundColor: ['#4CAF50', '#2196F3', '#FFC107', '#FF5733'],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // User Attempts Pie Chart
+    const ctx2 = document.getElementById('userAttemptsChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: userAttemptsLabels,
+            datasets: [{
+                data: userAttemptsValues,
+                backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#9B59B6']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+{% block style %}
+<style>
+    .chart-container {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .chart {
+        flex: 1;
+        min-width: 300px;
+        max-width: 45%;
+        text-align: center;
+    }
+    
+    .chart h4 {
+        margin-bottom: 10px;
+        color: #333;
+        font-size: 18px;
+    }
+</style>
+{% endblock %}

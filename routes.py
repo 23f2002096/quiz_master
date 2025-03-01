@@ -14,22 +14,22 @@ def login():
 def login_post():
     username = request.form.get('username')
     password = request.form.get('password')
-
+    #if username or password did not field in the input box give warning
     if not username or not password:
         flash('Please fill out all fields', 'warning')
         return redirect(url_for('login'))
-    
+    #geting the data from data base
     user = User.query.filter_by(username=username).first()
-    
+    # if usename not present in the database then redirect to login page and give waring
     if not user:
         flash('Username does not exist', 'danger')
         return redirect(url_for('login'))
-    
+    # if password is wrong give Warning
     if not check_password_hash(user.passhash, password):
         flash('Incorrect password', 'danger')
         return redirect(url_for('login'))
     
-    # this is so that i give welcome user or admin 
+    # geting the information so that session know that the user details
     session['user_id'] = user.id
     session['username'] = user.username
     session['is_admin'] = user.is_admin  
@@ -41,7 +41,8 @@ def login_post():
         return redirect(url_for('admin'))
     else:
         return redirect(url_for('index',user_id=user.id))
-
+    
+# registration page
 @app.route('/register')
 def register():
     return render_template('register.html')
@@ -54,7 +55,7 @@ def register_post():
     full_name = request.form.get('full_name')
     qualification=request.form.get('qualification')
     dob=request.form.get('dob')
-
+    # if any of the input box is empty give warning massage
     if not username or not password or not confirm_password:
         flash('Please fill out all fields','danger')
         return redirect(url_for('register'))
@@ -66,19 +67,21 @@ def register_post():
     user = User.query.filter_by(username=username).first()
 
     dob_date = None
-    if dob:  # Ensure DOB is not empty
+    if dob:  # Ensuring DOB is not empty
+        # using try and except so that we can convert dob in proper formate if not posible did not give error
         try:
             dob = datetime.strptime(dob, '%Y-%m-%d').date()
         except ValueError:
             flash('Invalid date format. Use YYYY-MM-DD.', 'danger')
             return redirect(url_for('register'))
-
+        
+    # if same username already present give Warning
     if user:
         flash('Username already exists','success')
         return redirect(url_for('register'))
-    
+    # increpting the password
     password_hash = generate_password_hash(password)
-    
+    # storing all the detail in the database
     new_user = User(username=username, passhash=password_hash, full_name=full_name,qualification=qualification,dob=dob)
     db.session.add(new_user)
     db.session.commit()
@@ -109,15 +112,17 @@ def admin_required(func):
         return func(*args, **kwargs)
     return inner
 
+# landing page for the admin/user
 @app.route('/')
 @auth_required
 def index():
     user = User.query.get(session['user_id'])
+    # if user is admin redirect to admin page if not show user page
     if user.is_admin:
         return redirect(url_for('admin'))
     
     # Fetch quizzes for the user
-    quizzes = Quiz.query.all()  # Replace this with logic to filter quizzes for the logged-in user if needed.
+    quizzes = Quiz.query.all() 
     formatted_quizzes = []
     today_date=datetime.now()
     dates=[]
@@ -127,7 +132,6 @@ def index():
     for date in dates:
         if date>=today_date:
             upcoming_date.append(date)
-    print(upcoming_date)
     for quiz in quizzes:
         if quiz.date_of_quiz not in upcoming_date:
             continue
@@ -139,6 +143,7 @@ def index():
         })
     return render_template('index.html', quizzes=formatted_quizzes)
 
+# logout button
 @app.route('/logout')
 @auth_required
 def logout():
@@ -154,6 +159,7 @@ def logout():
 @app.route('/admin')
 @admin_required
 def admin():
+    # this is used so that it will show only first 2 div wil show and we click on show all so it will show all the div's
     show_all = request.args.get('show_all', 'false').lower() == 'true'
     search_query = request.args.get('query', '').strip().lower()
 
@@ -171,7 +177,7 @@ def admin():
     # Filter subjects based on the search query
     if search_query:
         subjects = [subject for subject in subjects if search_query in subject.name.lower()]
-
+    # showing only firs 2 subjects
     if not show_all and not search_query:
         subjects = subjects[:2]
 
@@ -193,6 +199,7 @@ def admin():
 @app.route('/quiz')
 @admin_required
 def quiz():
+    # geting the search query
     search_query = request.args.get('query', '').strip().lower()
     show_all = request.args.get('show_all', 'false').lower() == 'true'
 
@@ -202,7 +209,7 @@ def quiz():
     # Filter quizzes based on search query
     if search_query:
         quizzes = [quiz for quiz in quizzes if search_query in quiz.chapter.name.lower()]
-
+    # show only the first 2 quizzes
     if not show_all:
         quizzes = quizzes[:2]
 
@@ -222,17 +229,16 @@ def quiz():
 @app.route('/user', methods=['GET'])
 @admin_required
 def user():
-    # Get the search query parameter if provided
+    # geting the search query
     search_query = request.args.get('query', '').strip().lower()
     
-    # If there's a search query, filter users by their username
+    # If there is a search query filter users by their username
     if search_query:
         user = User.query.filter(User.username.ilike(f'%{search_query}%')).first()
     else:
         # If no query is provided, just get the user by their ID
         user = User.query.get(1)
     
-    # Return the user details to the template
     return render_template('user_details.html', user=user)
 
 # -----------------------------------subject add/delete in the admin home page----------------
@@ -602,42 +608,8 @@ def start_quiz(quiz_id):
     )
 
 
-
-# @app.route('/summary/<int:user_id>/')
-# def summary(user_id):
-#     # Subject-wise number of quizzes (including subjects with no attempts)
-#     subject_quizzes = db.session.query(
-#         Subject.name.label('subject_name'),
-#         func.count(Quiz.id).label('quiz_count')
-#     ).outerjoin(Chapter, Chapter.subject_id == Subject.id)\
-#      .outerjoin(Quiz, Quiz.chapter_id == Chapter.id)\
-#      .outerjoin(Score, Quiz.id == Score.quiz_id)\
-#      .filter((Score.user_id == user_id) | (Score.user_id.is_(None)))\
-#      .group_by(Subject.name)\
-#      .all()
-
-#     subject_quiz_data = {row.subject_name: row.quiz_count for row in subject_quizzes}
-
-#     # Month-wise number of quizzes attempted
-#     month_quizzes = db.session.query(
-#         func.strftime('%m', Score.time_stamp_of_attempt).label('month'),
-#         func.count(Score.id).label('quiz_count')
-#     ).filter(Score.user_id == user_id)\
-#      .group_by(func.strftime('%m', Score.time_stamp_of_attempt))\
-#      .all()
-
-#     month_quiz_data = {row.month: row.quiz_count for row in month_quizzes}
-
-#     return render_template(
-#         '/user/summary.html',
-#         subject_data=subject_quiz_data,
-#         month_data=month_quiz_data
-#     )
-
-
-
 @app.route('/summary/<int:user_id>/')
-def summary(user_id):
+def user_summary(user_id):
     # Subject-wise number of quizzes attempted by the user
     subject_quizzes = db.session.query(
         Subject.name.label('subject_name'),
@@ -650,7 +622,6 @@ def summary(user_id):
      .all()
 
     subject_quiz_data = {row.subject_name: row.quiz_count for row in subject_quizzes}
-
     # Month-wise number of quizzes attempted
     month_quizzes = db.session.query(
         func.strftime('%m', Score.time_stamp_of_attempt).label('month'),
@@ -669,4 +640,37 @@ def summary(user_id):
         user=user,  # Pass user details
         subject_data=subject_quiz_data,
         month_data=month_quiz_data
+    )
+
+
+@app.route('/admin/summary/')
+def admin_summary():
+    # Subject-wise top scores
+    subject_top_scores = db.session.query(
+        Subject.name.label('subject_name'),
+        func.max(Score.total_score).label('top_score')
+    ).join(Chapter, Chapter.subject_id == Subject.id)\
+     .join(Quiz, Quiz.chapter_id == Chapter.id)\
+     .join(Score, Quiz.id == Score.quiz_id)\
+     .group_by(Subject.name)\
+     .all()
+
+    top_scores_data = {row.subject_name: row.top_score for row in subject_top_scores}
+
+    # Subject-wise number of user attempts
+    subject_attempts = db.session.query(
+        Subject.name.label('subject_name'),
+        func.count(Score.id).label('attempt_count')
+    ).join(Chapter, Chapter.subject_id == Subject.id)\
+     .join(Quiz, Quiz.chapter_id == Chapter.id)\
+     .join(Score, Quiz.id == Score.quiz_id)\
+     .group_by(Subject.name)\
+     .all()
+
+    user_attempts_data = {row.subject_name: row.attempt_count for row in subject_attempts}
+
+    return render_template(
+        '/admin/summary_admin.html',
+        top_scores=top_scores_data,
+        user_attempts=user_attempts_data
     )

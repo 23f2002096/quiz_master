@@ -21,9 +21,15 @@
                             <a class="nav-link active" aria-current="page" href="{{ url_for('quiz_scores', user_id=session['user_id']) }}">Score</a>
                         </li>
                     {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ url_for('summary', user_id=session['user_id']) }}">Summary</a>
-                    </li>
+                    {% if session['is_admin'] %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('admin_summary') }}">Summary</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('user_summary', user_id=session['user_id']) }}">Summary</a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{{ url_for('logout') }}">Logout</a>
                     </li>
@@ -39,10 +45,8 @@
 
             
             {% if session['is_admin'] %}
-                <!-- Include the search bar from 'searchbar.html' -->
+                <!-- Including the search bar from 'searchbar.html' -->
                 {% include 'searchbar_admin.html' %}
-            
-
             {% endif %}
 
             {% if 'user_id' in session %}
