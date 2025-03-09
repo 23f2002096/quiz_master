@@ -121,27 +121,41 @@ def index():
     if user.is_admin:
         return redirect(url_for('admin'))
     
-    # Fetch quizzes for the user
-    quizzes = Quiz.query.all() 
-    formatted_quizzes = []
-    today_date=datetime.now()
-    dates=[]
-    for quiz in quizzes:
-        dates.append(quiz.date_of_quiz)
-    upcoming_date=[]
-    for date in dates:
-        if date>=today_date:
-            upcoming_date.append(date)
-    for quiz in quizzes:
-        if quiz.date_of_quiz not in upcoming_date:
-            continue
-        formatted_quizzes.append({
+    search_query = request.args.get('query', '').strip().lower()
+
+    # Fetch all subjects, chapters, and quizzes
+    subjects = Subject.query.all()
+    chapters = Chapter.query.all()
+    quizzes = Quiz.query.all()
+
+    # Filter based on search query
+    if search_query:
+        subjects = [subject for subject in subjects if search_query in subject.name.lower()]
+        subject_ids = [subject.id for subject in subjects]
+        chapters = [chapter for chapter in chapters if chapter.subject_id in subject_ids or search_query in chapter.name.lower()]
+        quizzes = [quiz for quiz in quizzes if quiz.chapter_id in [chapter.id for chapter in chapters]]
+
+    # Filter only upcoming quizzes
+    today_date = datetime.now()
+    quizzes = [
+        {
             "id": quiz.id,
             "number_of_questions": Question.query.filter_by(quiz_id=quiz.id).count(),
             "date_of_quiz": quiz.date_of_quiz,
             "time_duration": quiz.time_duration
-        })
-    return render_template('index.html', quizzes=formatted_quizzes)
+        }
+        for quiz in quizzes if quiz.date_of_quiz >= today_date
+    ]
+
+    return render_template(
+        'index.html',
+        subjects=subjects,
+        chapters=chapters,
+        quizzes=quizzes,
+        search_query=search_query
+    )
+
+
 
 # logout button
 @app.route('/logout')
@@ -159,11 +173,11 @@ def logout():
 @app.route('/admin')
 @admin_required
 def admin():
-    # this is used so that it will show only first 2 div wil show and we click on show all so it will show all the div's
+    # this is used so that it will show only first 2 div will show and we click on show all so it will show all the div's
     show_all = request.args.get('show_all', 'false').lower() == 'true'
     search_query = request.args.get('query', '').strip().lower()
 
-    # Fetch all subjects
+    # Fetch all subjects,chapter,question
     subjects = Subject.query.all()
     chapters = Chapter.query.all()
     questions = Question.query.all()
@@ -232,14 +246,14 @@ def user():
     # geting the search query
     search_query = request.args.get('query', '').strip().lower()
     
-    # If there is a search query filter users by their username
+    # If there is a search query filter users by their username and used ilike so that case-sensitivity dont affect
     if search_query:
         user = User.query.filter(User.username.ilike(f'%{search_query}%')).first()
     else:
         # If no query is provided, just get the user by their ID
         user = User.query.get(1)
     
-    return render_template('user_details.html', user=user)
+    return render_template('admin/user_details.html', user=user)
 
 # -----------------------------------subject add/delete in the admin home page----------------
 @app.route('/admin/subject/add')
@@ -255,6 +269,7 @@ def add_subject_post():
     subject_names_database = db.session.query(Subject.name).all()
     subject_names_list = [name[0].lower() for name in subject_names_database]
 
+    # checking the subject is already present in database
     if subject_name.lower() in subject_names_list:
         flash('Subject already exists','danger')
         return redirect(url_for('add_subject'))
@@ -302,6 +317,8 @@ def add_chapter_post():
     subject_id = request.form['subject_id']
     chapter_name_database=db.session.query(Chapter.name).all()
     chapter_names_list = [name[0].lower() for name in chapter_name_database]
+
+    # checking chapter name is alreaddy present in database
     if chapter_name.lower() in chapter_names_list:
         flash('Chapter already exists','danger')
         return redirect(url_for('add_chapter'))
@@ -408,9 +425,9 @@ def add_quiz_post():
         flash('Quiz added successfully','success')
         return redirect(url_for('quiz'))
     except ValueError:
-        return "Invalid date or duration format. Ensure date is YYYY-MM-DD and duration is HH:MM.", 400
+        return "Invalid date or duration format. Ensure date is YYYY-MM-DD and duration is HH:MM.", 400  #this is clint side error
     except Exception as e:
-        return f"An error occurred: {e}", 500
+        return f"An error occurred: {e}", 500 #this is server side error
     
 @app.route('/quiz/<int:quiz_id>/delete')
 @admin_required
@@ -513,19 +530,21 @@ def search():
 
 
 
-
-
 # --------------------------------------user----------------------------------------
 
 @app.route('/quiz/<int:quiz_id>/details', methods=['GET'])
 @auth_required
 def quiz_details(quiz_id):
-    quiz = Quiz.query.get_or_404(quiz_id)
+    quiz = Quiz.query.get_or_404(quiz_id)   #when problem during fetching the data
     number_of_questions= Question.query.filter_by(quiz_id=quiz.id).count()
     chapter=Chapter.query.get(quiz.chapter_id)
     questions = Question.query.filter_by(quiz_id=quiz_id).all()
     subject = Subject.query.get(chapter.subject_id)
-    return render_template('/user/quiz_details.html', quiz=quiz,chapter=chapter ,questions=questions,number_of_questions=number_of_questions,subject=subject)
+    return render_template('/user/quiz_details.html',
+                quiz=quiz,chapter=chapter ,
+                questions=questions,number_of_questions=number_of_questions,
+                subject=subject
+    )
 
 @app.route('/quiz_scores/<int:user_id>')
 @auth_required

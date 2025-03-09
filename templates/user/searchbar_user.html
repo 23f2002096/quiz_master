@@ -1,0 +1,36 @@
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="searchFormUser" method="GET">
+                <div class="input-group">
+                    <select 
+                        name="redirect" 
+                        id="redirectUser" 
+                        class="form-select"
+                        onchange="updateUserFormAction(this.value)">
+                        <option value="" disabled>Select an option</option>
+                        <option value="subject" {% if request.args.get('redirect') == 'subject' %}selected{% endif %}>Subject</option>
+                        <option value="chapter" {% if request.args.get('redirect') == 'chapter' %}selected{% endif %}>Chapter</option>
+                    </select>
+                    <input 
+                        class="form-control me-2" 
+                        type="search" 
+                        name="query" 
+                        placeholder="Search" 
+                        aria-label="Search"
+                        value="{{ request.args.get('query', '') }}">
+                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateUserFormAction(value) {
+        const form = document.getElementById('searchFormUser');
+        if (value) {
+            form.action = "{{ url_for('index') }}";
+        }
+    }
+</script>

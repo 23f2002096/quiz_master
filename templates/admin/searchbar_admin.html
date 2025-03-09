@@ -1,0 +1,37 @@
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="searchFormAdmin" method="GET">
+                <div class="input-group">
+                    <select 
+                        name="redirect" 
+                        id="redirectAdmin" 
+                        class="form-select"
+                        onchange="updateAdminFormAction(this.value)">
+                        <option value="" disabled>Select an option</option>
+                        <option value="{{ url_for('admin') }}" {% if request.args.get('redirect') == url_for('admin') %}selected{% endif %}>Subject</option>
+                        <option value="{{ url_for('quiz') }}" {% if request.args.get('redirect') == url_for('quiz') %}selected{% endif %}>Quiz</option>
+                        <option value="{{ url_for('user') }}" {% if request.args.get('redirect') == url_for('user') %}selected{% endif %}>User</option>
+                    </select>
+                    <input 
+                        class="form-control me-2" 
+                        type="search" 
+                        name="query" 
+                        placeholder="Search" 
+                        aria-label="Search"
+                        value="{{ request.args.get('query', '') }}">
+                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateAdminFormAction(value) {
+        const form = document.getElementById('searchFormAdmin');
+        if (value) {
+            form.action = value;
+        }
+    }
+</script>

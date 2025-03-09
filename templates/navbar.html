@@ -46,7 +46,10 @@
             
             {% if session['is_admin'] %}
                 <!-- Including the search bar from 'searchbar.html' -->
-                {% include 'searchbar_admin.html' %}
+                {% include 'admin/searchbar_admin.html' %}
+            {% else %}
+                {% include 'user/searchbar_user.html' %}
+
             {% endif %}
 
             {% if 'user_id' in session %}
