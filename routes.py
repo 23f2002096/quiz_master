@@ -363,7 +363,7 @@ def delete_chapter_post(chapter_id):
 @app.route('/edit_chapter/<int:id>', methods=['GET', 'POST'])
 @admin_required
 def edit_chapter(id):
-    chapter = Chapter.query.get_or_404(id)
+    chapter = Chapter.query.get_or_404(id)#id no matching database found
 
     if request.method == 'POST':
         chapter.name = request.form['name']
@@ -551,7 +551,7 @@ def quiz_details(quiz_id):
 def quiz_scores(user_id):
     user = User.query.get(session['user_id'])
     if not user or user.id != user_id:
-        return "Unauthorized access", 403
+        return "Unauthorized access", 403     #when non authorized person want to access
 
     scores = Score.query.filter_by(user_id=user.id).all()
 
