@@ -23,7 +23,7 @@
         required>
     </div>
     <div class="form-group">
-        <label for="subject" class="form-label">Chapter:</label>
+        <label for="subject" class="form-label">Subject:</label>
         <select name="subject_id" id="subject" class="form-control" required>
             {% for subject in subjects %}
             <option value="{{ subject.id }}">{{ subject.name }}</option>
